@@ -22,338 +22,369 @@
         body { font-family: 'Sarabun', sans-serif; background-color: #f3f4f6; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Animation สำหรับเปลี่ยนหน้า */
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
     </style>
 </head>
 <body class="min-h-screen p-4 md:p-8 flex justify-center">
 
     <div id="app" class="w-full max-w-3xl">
         
-        <!-- Header & Search -->
-        <div class="bg-white rounded-3xl shadow-lg p-6 md:p-10 mb-6 text-center transition-all duration-300 relative overflow-hidden">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 transition-colors relative z-10"
-                 :class="searchMode === 'item' ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-orange-600'">
-                <svg v-if="searchMode === 'item'" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-            </div>
-            
-            <h1 class="text-3xl font-bold text-gray-800 mb-2 relative z-10">
-                {{ searchMode === 'item' ? 'ค้นหาอะไหล่และอุปกรณ์' : 'ค้นหาร้านค้า' }}
-            </h1>
-            <p class="text-gray-500 mb-6 relative z-10">
-                {{ searchMode === 'item' ? 'ค้นหาเพื่อดูรายชื่อร้านค้าที่จัดจำหน่าย และจัดการข้อมูล' : 'ค้นหาเพื่อดูข้อมูลติดต่อ แก้ไขข้อมูลร้าน และดูรายการอะไหล่' }}
-            </p>
-
-            <!-- Mode Switcher Tabs -->
-            <div class="flex justify-center mb-6 bg-gray-100 p-1 rounded-2xl max-w-md mx-auto relative z-10">
-                <button @click="searchMode = 'item'; searchText = '';" 
-                        class="flex-1 py-2 px-4 rounded-xl font-bold text-sm transition-all"
-                        :class="searchMode === 'item' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
-                    ⚙️ อะไหล่และอุปกรณ์
-                </button>
-                <button @click="searchMode = 'vendor'; searchText = '';" 
-                        class="flex-1 py-2 px-4 rounded-xl font-bold text-sm transition-all"
-                        :class="searchMode === 'vendor' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
-                    🏪 ข้อมูลร้านค้า
-                </button>
-            </div>
-
-            <!-- Search Box -->
-            <div class="relative max-w-xl mx-auto flex gap-2">
-                <div class="relative flex-1">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
-                    <input type="text" v-model="searchText" 
-                           :placeholder="searchMode === 'item' ? 'ค้นหา เช่น กรอง, ลูกปืน, ปั๊ม...' : 'ค้นหาชื่อร้านค้า เช่น ไทยฟิลเตอร์, เจริญยนต์...'" 
-                           class="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-lg focus:outline-none transition-colors shadow-inner"
-                           :class="searchMode === 'item' ? 'focus:border-blue-500' : 'focus:border-orange-500'"
-                           autocomplete="off">
-                    <button v-if="searchText" @click="searchText = ''" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                </div>
-                <!-- Add New Button -->
-                <button @click="openCreateModal" class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-xl font-bold transition-all shadow-md flex items-center gap-2 shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
-                    <span class="hidden sm:inline">เพิ่มข้อมูล</span>
-                </button>
-            </div>
-        </div>
-
         <!-- System Message -->
-        <div v-if="systemMessage.show" class="mb-4 p-4 rounded-xl flex items-center gap-3 transition-all" :class="systemMessage.isError ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'">
+        <div v-if="systemMessage.show" class="mb-4 p-4 rounded-xl flex items-center gap-3 transition-all shadow-md sticky top-4 z-50" :class="systemMessage.isError ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'">
             <svg v-if="!systemMessage.isError" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             <p class="font-medium">{{ systemMessage.text }}</p>
         </div>
 
-        <!-- Loading -->
-        <div v-if="isLoading || isSaving" class="text-center py-10">
-            <div class="animate-spin inline-block w-10 h-10 border-[4px] border-current border-t-transparent text-blue-600 rounded-full" role="status"></div>
-            <p class="mt-4 text-gray-500 font-medium">{{ isSaving ? 'กำลังบันทึกลงฐานข้อมูล...' : 'กำลังโหลดข้อมูลจาก Google Sheets...' }}</p>
+        <!-- Loading Global -->
+        <div v-if="isLoading || isSaving" class="text-center py-20 bg-white rounded-3xl shadow-lg mb-6">
+            <div class="animate-spin inline-block w-12 h-12 border-[4px] border-current border-t-transparent text-blue-600 rounded-full" role="status"></div>
+            <p class="mt-4 text-gray-500 font-bold text-lg">{{ isSaving ? 'กำลังบันทึกลงฐานข้อมูล...' : 'กำลังโหลดข้อมูลจาก Google Sheets...' }}</p>
         </div>
 
         <template v-if="!isLoading && !isSaving">
+            
             <!-- ========================================== -->
-            <!-- Results List: ITEM MODE -->
+            <!-- VIEW: หน้าหลัก (Home) -->
             <!-- ========================================== -->
-            <div v-if="searchMode === 'item'" class="space-y-3 animate-[fadeIn_0.3s_ease-out]">
-                <p class="text-sm font-semibold text-gray-500 px-2">รายการอะไหล่และอุปกรณ์ (พบ {{ filteredItems.length }} รายการ)</p>
-                
-                <div v-if="filteredItems.length === 0" class="bg-white rounded-2xl p-10 text-center shadow-sm border border-gray-100">
-                    <svg class="mx-auto h-12 w-12 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    <p class="text-gray-500 mb-4">ไม่พบอะไหล่ที่คุณค้นหา</p>
-                    <button @click="openCreateModal" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-blue-200">
-                        + เพิ่มอะไหล่ "{{ searchText }}" ลงระบบ
-                    </button>
-                </div>
-
-                <!-- Item Cards -->
-                <div v-for="(item, index) in filteredItems" :key="index" 
-                     @click="openItem(item)"
-                     class="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-blue-300 border border-transparent transition-all cursor-pointer flex justify-between items-center group">
-                    <div class="flex items-center gap-4">
-                        <div class="bg-blue-50 text-blue-600 p-3 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-bold text-gray-800">{{ getItemName(item) }}</h3>
-                        </div>
+            <div v-if="viewState === 'home'" class="animate-[fadeIn_0.3s_ease-out]">
+                <!-- Header & Search -->
+                <div class="bg-white rounded-3xl shadow-lg p-6 md:p-10 mb-6 text-center transition-all duration-300 relative overflow-hidden">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 transition-colors relative z-10"
+                         :class="searchMode === 'item' ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-orange-600'">
+                        <svg v-if="searchMode === 'item'" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
                     </div>
-                    <div class="text-blue-500 bg-blue-50 p-2 rounded-full group-hover:bg-blue-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ========================================== -->
-            <!-- Results List: VENDOR MODE -->
-            <!-- ========================================== -->
-            <div v-else-if="searchMode === 'vendor'" class="space-y-3 animate-[fadeIn_0.3s_ease-out]">
-                <p class="text-sm font-semibold text-gray-500 px-2">รายชื่อร้านค้า (พบ {{ filteredVendors.length }} ร้าน)</p>
-                
-                <div v-if="filteredVendors.length === 0" class="bg-white rounded-2xl p-10 text-center shadow-sm border border-gray-100">
-                    <svg class="mx-auto h-12 w-12 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                    <p class="text-gray-500 mb-4">ไม่พบร้านค้าที่คุณค้นหา</p>
-                    <button @click="openCreateModal" class="bg-orange-100 text-orange-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-orange-200">
-                        + เพิ่มร้านค้า "{{ searchText }}" ลงระบบ
-                    </button>
-                </div>
-
-                <!-- Vendor Cards -->
-                <div v-for="(vendor, index) in filteredVendors" :key="'v'+index" 
-                     @click="openVendor(getVendorName(vendor))"
-                     class="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-orange-300 border border-transparent transition-all cursor-pointer flex justify-between items-center group">
-                    <div class="flex items-center gap-4">
-                        <div class="bg-orange-50 text-orange-500 p-3 rounded-xl group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-bold text-gray-800">{{ getVendorName(vendor) }}</h3>
-                            <p class="text-sm text-gray-400">คลิกเพื่อดูและแก้ไขข้อมูลติดต่อ</p>
-                        </div>
-                    </div>
-                    <div class="text-orange-500 bg-orange-50 p-2 rounded-full group-hover:bg-orange-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                    </div>
-                </div>
-            </div>
-        </template>
-
-
-        <!-- ========================================== -->
-        <!-- POPUP 1: จัดการอะไหล่และร้านค้า (Item Modal) -->
-        <!-- ========================================== -->
-        <div v-if="modals.item.show" :style="{ zIndex: modals.item.zIndex }" class="fixed inset-0 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm transition-opacity" @click.self="closeItemModalOnly">
-            <div class="bg-white w-full sm:rounded-3xl rounded-t-3xl shadow-2xl max-w-lg overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[90vh] animate-[slideUp_0.3s_ease-out] sm:animate-[fadeIn_0.2s_ease-out]">
-                
-                <div class="p-5 sm:p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
-                    <div>
-                        <span class="text-xs font-bold text-blue-500 uppercase tracking-wider">จัดการข้อมูลอะไหล่</span>
-                        <h3 class="text-2xl font-bold text-gray-900 mt-1">{{ modals.item.itemName }}</h3>
-                    </div>
-                    <button @click="closeItemModalOnly" class="text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full p-2 transition-colors">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-                
-                <div class="p-4 sm:p-6 overflow-y-auto bg-gray-50 no-scrollbar space-y-6">
                     
-                    <!-- Section: ร้านค้าปัจจุบัน -->
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2 relative z-10">
+                        {{ searchMode === 'item' ? 'ค้นหาอะไหล่และอุปกรณ์' : 'ค้นหาร้านค้า' }}
+                    </h1>
+                    <p class="text-gray-500 mb-6 relative z-10 text-sm md:text-base">
+                        {{ searchMode === 'item' ? 'ค้นหาเพื่อดูรายชื่อร้านค้าที่จัดจำหน่าย และจัดการข้อมูล' : 'ค้นหาเพื่อดูข้อมูลติดต่อ แก้ไขข้อมูลร้าน และดูรายการอะไหล่' }}
+                    </p>
+
+                    <!-- Mode Switcher Tabs -->
+                    <div class="flex justify-center mb-6 bg-gray-100 p-1 rounded-2xl max-w-md mx-auto relative z-10">
+                        <button @click="searchMode = 'item'; searchText = ''; resetPagination();" 
+                                class="flex-1 py-2 px-4 rounded-xl font-bold text-sm transition-all"
+                                :class="searchMode === 'item' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
+                            ⚙️ อะไหล่และอุปกรณ์
+                        </button>
+                        <button @click="searchMode = 'vendor'; searchText = ''; resetPagination();" 
+                                class="flex-1 py-2 px-4 rounded-xl font-bold text-sm transition-all"
+                                :class="searchMode === 'vendor' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
+                            🏪 ข้อมูลร้านค้า
+                        </button>
+                    </div>
+
+                    <!-- Search Box -->
+                    <div class="relative max-w-xl mx-auto flex gap-2">
+                        <div class="relative flex-1">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input type="text" v-model="searchText" @input="resetPagination"
+                                   :placeholder="searchMode === 'item' ? 'ค้นหา เช่น กรอง, ลูกปืน, ปั๊ม...' : 'ค้นหาชื่อร้านค้า...'" 
+                                   class="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-lg focus:outline-none transition-colors shadow-inner"
+                                   :class="searchMode === 'item' ? 'focus:border-blue-500' : 'focus:border-orange-500'"
+                                   autocomplete="off">
+                            <button v-if="searchText" @click="searchText = ''; resetPagination();" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                        <button @click="openCreateView" class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-xl font-bold transition-all shadow-md flex items-center gap-2 shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                            <span class="hidden sm:inline">เพิ่มข้อมูล</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results List: ITEM MODE -->
+                <div v-if="searchMode === 'item'" class="space-y-3">
+                    <div class="flex justify-between items-center px-2">
+                        <p class="text-sm font-semibold text-gray-500">รายการอะไหล่และอุปกรณ์ (พบ {{ filteredItems.length }} รายการ)</p>
+                    </div>
+                    
+                    <div v-if="filteredItems.length === 0" class="bg-white rounded-2xl p-10 text-center shadow-sm border border-gray-100">
+                        <svg class="mx-auto h-12 w-12 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <p class="text-gray-500 mb-4">ไม่พบอะไหล่ที่คุณค้นหา</p>
+                        <button @click="openCreateView" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-blue-200">
+                            + เพิ่มอะไหล่ "{{ searchText }}" ลงระบบ
+                        </button>
+                    </div>
+
+                    <div v-for="(item, index) in displayedItems" :key="index" 
+                         @click="openItem(item)"
+                         class="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-blue-300 border border-transparent transition-all cursor-pointer flex justify-between items-center group">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-blue-50 text-blue-600 p-3 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">{{ getItemName(item) }}</h3>
+                            </div>
+                        </div>
+                        <div class="text-blue-500 bg-blue-50 p-2 rounded-full group-hover:bg-blue-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                        </div>
+                    </div>
+                    
+                    <!-- ปุ่ม Load More (Pagination) -->
+                    <div v-if="displayedItems.length < filteredItems.length" class="text-center pt-4">
+                        <button @click="loadMoreItems" class="bg-white border border-gray-300 text-gray-600 hover:bg-gray-50 px-6 py-2.5 rounded-full font-bold text-sm shadow-sm transition-colors">
+                            โหลดเพิ่มเติม (เหลืออีก {{ filteredItems.length - displayedItems.length }})
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results List: VENDOR MODE -->
+                <div v-else-if="searchMode === 'vendor'" class="space-y-3">
+                    <div class="flex justify-between items-center px-2">
+                        <p class="text-sm font-semibold text-gray-500">รายชื่อร้านค้า (พบ {{ filteredVendors.length }} ร้าน)</p>
+                    </div>
+                    
+                    <div v-if="filteredVendors.length === 0" class="bg-white rounded-2xl p-10 text-center shadow-sm border border-gray-100">
+                        <svg class="mx-auto h-12 w-12 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                        <p class="text-gray-500 mb-4">ไม่พบร้านค้าที่คุณค้นหา</p>
+                        <button @click="openCreateView" class="bg-orange-100 text-orange-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-orange-200">
+                            + เพิ่มร้านค้า "{{ searchText }}" ลงระบบ
+                        </button>
+                    </div>
+
+                    <div v-for="(vendor, index) in displayedVendors" :key="'v'+index" 
+                         @click="openVendor(getVendorName(vendor))"
+                         class="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-orange-300 border border-transparent transition-all cursor-pointer flex justify-between items-center group">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-orange-50 text-orange-500 p-3 rounded-xl group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">{{ getVendorName(vendor) }}</h3>
+                                <p class="text-sm text-gray-400">คลิกเพื่อดูและแก้ไขข้อมูลติดต่อ</p>
+                            </div>
+                        </div>
+                        <div class="text-orange-500 bg-orange-50 p-2 rounded-full group-hover:bg-orange-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                        </div>
+                    </div>
+                    
+                    <!-- ปุ่ม Load More (Pagination) -->
+                    <div v-if="displayedVendors.length < filteredVendors.length" class="text-center pt-4">
+                        <button @click="loadMoreVendors" class="bg-white border border-gray-300 text-gray-600 hover:bg-gray-50 px-6 py-2.5 rounded-full font-bold text-sm shadow-sm transition-colors">
+                            โหลดเพิ่มเติม (เหลืออีก {{ filteredVendors.length - displayedVendors.length }})
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- VIEW: หน้าจัดการอะไหล่และร้านค้า (Item Detail) -->
+            <!-- ========================================== -->
+            <div v-else-if="viewState === 'itemDetail'" class="bg-white rounded-3xl shadow-xl overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+                <!-- Header -->
+                <div class="bg-blue-600 p-6 sm:p-8 text-white relative">
+                    <button @click="goBack" class="absolute top-6 left-6 text-white bg-black/20 hover:bg-black/40 px-3 py-1.5 rounded-full text-sm font-bold transition-colors flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                        ย้อนกลับ
+                    </button>
+                    <div class="mt-8 text-center">
+                        <span class="inline-block bg-blue-500 text-white text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider mb-2 border border-blue-400">ข้อมูลอะไหล่</span>
+                        <h2 class="text-3xl font-bold">{{ activeItemData.itemName }}</h2>
+                    </div>
+                </div>
+                
+                <div class="p-5 sm:p-8 bg-gray-50 space-y-6">
+                    <!-- ร้านค้าปัจจุบัน -->
                     <div>
-                        <h4 class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                            ร้านค้าที่มีจำหน่าย ({{ modals.item.vendors.length }})
+                        <h4 class="text-base font-bold text-gray-700 mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                            ร้านค้าที่มีจำหน่าย ({{ activeItemData.vendors.length }})
                         </h4>
                         
-                        <div v-if="modals.item.vendors.length === 0" class="text-center p-4 border border-dashed border-gray-300 rounded-xl bg-gray-100">
-                            <p class="text-sm text-gray-500 italic">ยังไม่มีร้านค้า กรุณาเพิ่มร้านค้าด้านล่าง</p>
+                        <div v-if="activeItemData.vendors.length === 0" class="text-center p-6 border-2 border-dashed border-gray-300 rounded-2xl bg-white">
+                            <p class="text-gray-500 italic">ยังไม่มีข้อมูลร้านค้า กรุณาเพิ่มร้านค้าด้านล่าง</p>
                         </div>
 
-                        <div class="space-y-2">
-                            <div v-for="(vendorName, index) in modals.item.vendors" :key="index" 
-                                 class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex justify-between items-center group">
-                                <div class="flex items-center gap-3 flex-1 cursor-pointer" @click="openVendor(vendorName)">
-                                    <div class="bg-blue-50 text-blue-600 p-2 rounded-lg group-hover:bg-blue-100 transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                        <div class="space-y-3">
+                            <div v-for="(vendorName, index) in activeItemData.vendors" :key="index" 
+                                 class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex justify-between items-center group cursor-pointer hover:border-blue-300 transition-colors"
+                                 @click="openVendor(vendorName)">
+                                <div class="flex items-center gap-4 flex-1">
+                                    <div class="bg-blue-50 text-blue-600 p-3 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
                                     </div>
                                     <div>
-                                        <h4 class="font-bold text-gray-800 text-sm group-hover:text-blue-600 transition-colors">{{ vendorName }}</h4>
+                                        <h4 class="font-bold text-gray-800 text-lg group-hover:text-blue-600 transition-colors">{{ vendorName }}</h4>
+                                        <p class="text-xs text-gray-400">คลิกดูข้อมูลติดต่อ</p>
                                     </div>
                                 </div>
-                                
-                                <!-- ปุ่มลบร้านค้าออกจากอะไหล่นี้ -->
-                                <button @click.stop="removeVendorFromItem(vendorName)" class="text-gray-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors" title="ลบร้านนี้ออก">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                                <button @click.stop="removeVendorFromItem(vendorName)" class="text-gray-300 hover:text-red-500 hover:bg-red-50 p-2.5 rounded-xl transition-colors border border-transparent hover:border-red-100" title="ลบร้านนี้ออก">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Section: เพิ่มร้านค้าเข้าอะไหล่ -->
-                    <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
-                        <h4 class="text-sm font-bold text-gray-700 mb-2">➕ เพิ่มร้านค้าที่ขายอะไหล่ชิ้นนี้</h4>
-                        <div class="flex flex-col gap-2">
-                            <!-- Searchable Dropdown สำหรับเลือกร้านเพิ่ม -->
+                    <!-- เพิ่มร้านค้าเข้าอะไหล่ -->
+                    <div class="bg-white p-5 sm:p-6 rounded-2xl border border-gray-200 shadow-sm mt-6">
+                        <h4 class="text-base font-bold text-gray-700 mb-3">➕ เพิ่มร้านค้าที่ขายอะไหล่ชิ้นนี้</h4>
+                        <div class="flex flex-col gap-3">
                             <div class="relative">
-                                <div v-if="modals.item.showVendorDropdown" class="fixed inset-0 z-10" @click="modals.item.showVendorDropdown = false"></div>
+                                <div v-if="activeItemData.showVendorDropdown" class="fixed inset-0 z-10" @click="activeItemData.showVendorDropdown = false"></div>
                                 <div class="relative z-20">
-                                    <input type="text" v-model="modals.item.vendorSearchQuery" @focus="modals.item.showVendorDropdown = true" 
+                                    <input type="text" v-model="activeItemData.vendorSearchQuery" @focus="activeItemData.showVendorDropdown = true" 
                                            placeholder="พิมพ์ค้นหา หรือเลือกร้านค้า..." 
-                                           class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                                    <div v-if="modals.item.showVendorDropdown" class="absolute w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto py-1">
-                                        <div v-if="filteredAvailableVendorsForItemModal.length === 0" class="p-3 text-gray-500 text-sm italic">ไม่พบร้านค้าที่ค้นหา</div>
-                                        <div v-for="v in filteredAvailableVendorsForItemModal" :key="v" @click="selectVendorForItemModal(v)" class="p-2.5 hover:bg-blue-50 cursor-pointer text-gray-700 text-sm font-medium border-b border-gray-50 last:border-0">
+                                           class="w-full border-2 border-gray-300 rounded-xl p-3 focus:border-blue-500 outline-none bg-white text-base">
+                                    <div v-if="activeItemData.showVendorDropdown" class="absolute w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto py-1">
+                                        <div v-if="filteredAvailableVendorsForItemModal.length === 0" class="p-4 text-gray-500 italic text-center">ไม่พบร้านค้าที่ค้นหา</div>
+                                        <div v-for="v in filteredAvailableVendorsForItemModal" :key="v" @click="selectVendorForItemModal(v)" class="p-3 hover:bg-blue-50 cursor-pointer text-gray-700 font-medium border-b border-gray-50 last:border-0">
                                             {{ v }}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <button @click="addVendorToItem" :disabled="!modals.item.selectedVendorToAdd" 
-                                    class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-2.5 rounded-lg transition-colors text-sm">
+                            <button @click="addVendorToItem" :disabled="!activeItemData.selectedVendorToAdd" 
+                                    class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors text-base shadow-md">
                                 บันทึกเพิ่มร้าน
                             </button>
                         </div>
-                        <p class="text-xs text-gray-400 mt-2 text-center">
-                            ถ้าร้านไม่มีในรายชื่อ กรุณาปิดหน้านี้แล้วไป <span class="text-orange-500 font-bold cursor-pointer" @click="closeItemModalOnly(); searchMode='vendor'; openCreateModal();">เพิ่มข้อมูลร้านค้าใหม่</span> ก่อน
+                        <p class="text-sm text-gray-400 mt-4 text-center">
+                            ถ้าร้านไม่มีในรายชื่อ กรุณา <span class="text-orange-500 font-bold cursor-pointer hover:underline" @click="navigateTo('createView'); searchMode='vendor';">เพิ่มข้อมูลร้านค้าใหม่</span>
                         </p>
                     </div>
 
+                    <!-- ส่วนอันตราย: ลบรายการอะไหล่ -->
+                    <div class="pt-8 border-t border-gray-200">
+                        <div v-if="!activeItemData.isConfirmingDelete" class="text-center">
+                            <button @click="activeItemData.isConfirmingDelete = true" class="text-red-500 hover:text-red-700 font-bold flex items-center justify-center gap-2 transition-colors mx-auto px-4 py-2 hover:bg-red-50 rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                ลบรายการอะไหล่นี้ออกจากระบบ
+                            </button>
+                        </div>
+                        <div v-else class="bg-red-50 p-6 rounded-2xl border border-red-200 text-center animate-[fadeIn_0.2s_ease-out]">
+                            <p class="text-red-700 font-bold mb-2 text-lg">คุณแน่ใจหรือไม่ที่จะลบอะไหล่ชิ้นนี้?</p>
+                            <p class="text-sm text-red-500 mb-6">ข้อมูลจะถูกลบออกจากฐานข้อมูลและไม่สามารถกู้คืนได้</p>
+                            <div class="flex gap-3">
+                                <button @click="activeItemData.isConfirmingDelete = false" class="flex-1 py-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition-colors">ยกเลิก</button>
+                                <button @click="deleteItem" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-md">ยืนยันการลบ</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- ========================================== -->
-        <!-- POPUP 2: ข้อมูลติดต่อร้านค้า และแก้ไข (Vendor Modal) -->
-        <!-- ========================================== -->
-        <div v-if="modals.vendor.show" :style="{ zIndex: modals.vendor.zIndex }" class="fixed inset-0 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm" @click.self="closeVendorModalOnly">
-            <div class="bg-white w-full sm:rounded-3xl rounded-t-3xl shadow-2xl max-w-md overflow-hidden flex flex-col max-h-[90vh] animate-[slideUp_0.3s_ease-out] sm:animate-[fadeIn_0.2s_ease-out]">
-                
-                <!-- Header (สีส้ม=ดู, สีเทา=แก้ไข) -->
-                <div class="p-6 sm:p-8 text-white relative shrink-0 transition-colors" :class="modals.vendor.isEditing ? 'bg-gray-800' : 'bg-gradient-to-r from-orange-500 to-orange-600'">
-                    <button @click="closeVendorModalOnly" class="absolute top-4 right-4 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-full p-2 transition-colors">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <!-- ========================================== -->
+            <!-- VIEW: หน้าข้อมูลร้านค้า (Vendor Detail) -->
+            <!-- ========================================== -->
+            <div v-else-if="viewState === 'vendorDetail'" class="bg-white rounded-3xl shadow-xl overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+                <!-- Header (ส้ม=ดู, เทา=แก้ไข) -->
+                <div class="p-6 sm:p-8 text-white relative transition-colors duration-300" :class="activeVendorData.isEditing ? 'bg-gray-800' : 'bg-gradient-to-r from-orange-500 to-orange-600'">
+                    <button @click="goBack" class="absolute top-6 left-6 text-white bg-black/20 hover:bg-black/40 px-3 py-1.5 rounded-full text-sm font-bold transition-colors flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                        ย้อนกลับ
                     </button>
                     
-                    <button v-if="!modals.vendor.isEditing" @click="startEditVendor" class="absolute top-4 left-4 text-white bg-black/20 hover:bg-black/40 px-3 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                        แก้ไขข้อมูล
+                    <button v-if="!activeVendorData.isEditing" @click="startEditVendor" class="absolute top-6 right-6 text-white bg-black/20 hover:bg-black/40 px-3 py-1.5 rounded-full text-sm font-bold transition-colors flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                        แก้ไข
                     </button>
 
-                    <div class="flex flex-col items-center text-center mt-4">
-                        <div class="bg-white/20 p-4 rounded-full mb-3 backdrop-blur-sm shadow-inner">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                    <div class="mt-10 text-center">
+                        <div class="inline-block bg-white/20 p-4 rounded-full mb-4 backdrop-blur-sm shadow-inner">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
                         </div>
-                        <h3 v-if="!modals.vendor.isEditing" class="text-2xl font-bold">{{ modals.vendor.info.Vendor_Name }}</h3>
-                        <h3 v-else class="text-lg font-bold text-gray-300">โหมดแก้ไขข้อมูลร้านค้า</h3>
+                        <h2 v-if="!activeVendorData.isEditing" class="text-3xl font-bold">{{ activeVendorData.info.Vendor_Name }}</h2>
+                        <h2 v-else class="text-2xl font-bold text-gray-200">โหมดแก้ไขข้อมูลร้านค้า</h2>
                     </div>
                 </div>
                 
-                <div class="p-6 bg-white overflow-y-auto no-scrollbar">
+                <div class="p-5 sm:p-8 bg-gray-50">
                     
                     <!-- โหมดแสดงผลปกติ -->
-                    <div v-if="!modals.vendor.isEditing" class="space-y-4">
-                        <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm">
-                            <div class="bg-blue-100 p-3 rounded-full text-blue-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg></div>
+                    <div v-if="!activeVendorData.isEditing" class="space-y-5">
+                        <div class="flex items-center gap-5 p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                            <div class="bg-blue-100 p-4 rounded-xl text-blue-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg></div>
                             <div class="flex-1">
-                                <p class="text-xs text-gray-500 font-semibold mb-0.5">เบอร์โทรศัพท์</p>
-                                <p class="font-bold text-gray-900 text-lg">{{ modals.vendor.info.Phone }}</p>
+                                <p class="text-sm text-gray-500 font-bold mb-1">เบอร์โทรศัพท์</p>
+                                <p class="font-bold text-gray-900 text-xl">{{ activeVendorData.info.Phone || '-' }}</p>
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm">
-                            <div class="bg-[#00B900]/10 p-3 rounded-full text-[#00B900]"><svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.036 9.608.391.084.922.258 1.057.592.122.303.079.778.039 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.647 1.281-.54 6.911-4.069 9.428-6.967 1.739-1.907 2.572-3.843 2.572-5.992z"/></svg></div>
+                        <div class="flex items-center gap-5 p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                            <div class="bg-[#00B900]/10 p-4 rounded-xl text-[#00B900]"><svg class="h-7 w-7" fill="currentColor" viewBox="0 0 24 24"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.036 9.608.391.084.922.258 1.057.592.122.303.079.778.039 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.647 1.281-.54 6.911-4.069 9.428-6.967 1.739-1.907 2.572-3.843 2.572-5.992z"/></svg></div>
                             <div class="flex-1">
-                                <p class="text-xs text-gray-500 font-semibold mb-0.5">LINE ID</p>
-                                <p class="font-bold text-gray-900 text-lg">{{ modals.vendor.info.Line_ID }}</p>
+                                <p class="text-sm text-gray-500 font-bold mb-1">LINE ID</p>
+                                <p class="font-bold text-gray-900 text-xl">{{ activeVendorData.info.Line_ID || '-' }}</p>
                             </div>
                         </div>
 
                         <!-- รายการอะไหล่ที่ร้านนี้ขาย -->
-                        <div class="mt-6 pt-5 border-t border-gray-200">
-                            <div class="flex items-center gap-2 mb-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
-                                <h4 class="text-sm font-bold text-gray-700">อะไหล่และอุปกรณ์ที่มีจำหน่าย</h4>
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <div class="flex items-center gap-2 mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                                <h4 class="text-lg font-bold text-gray-700">อะไหล่และอุปกรณ์ที่มีจำหน่าย</h4>
                             </div>
                             
-                            <div class="space-y-2 mt-2">
-                                <div v-if="modals.vendor.info.Items_Sold.length === 0" class="text-center p-4 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                                    <span class="text-sm text-gray-400 italic">ยังไม่มีข้อมูลอะไหล่ ผูกกับร้านนี้</span>
+                            <div class="space-y-3">
+                                <div v-if="activeVendorData.info.Items_Sold.length === 0" class="text-center p-6 bg-white rounded-2xl border-2 border-dashed border-gray-200">
+                                    <span class="text-gray-500 italic">ยังไม่มีข้อมูลอะไหล่ ผูกกับร้านนี้</span>
                                 </div>
-                                <div v-for="item in modals.vendor.info.Items_Sold" :key="item" 
+                                <div v-for="item in activeVendorData.info.Items_Sold" :key="item" 
                                      @click="openItem(item)"
-                                     class="bg-white border border-gray-200 p-3 rounded-xl shadow-sm hover:shadow-md hover:border-blue-300 cursor-pointer transition-all flex justify-between items-center group">
-                                    <div class="flex items-center gap-3">
-                                        <div class="bg-blue-50 text-blue-600 p-2 rounded-lg group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg>
+                                     class="bg-white border border-gray-200 p-4 rounded-2xl shadow-sm hover:shadow-md hover:border-blue-300 cursor-pointer transition-all flex justify-between items-center group">
+                                    <div class="flex items-center gap-4">
+                                        <div class="bg-blue-50 text-blue-600 p-3 rounded-xl group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg>
                                         </div>
-                                        <span class="font-bold text-gray-700 group-hover:text-blue-600 transition-colors">{{ item }}</span>
+                                        <span class="font-bold text-gray-800 text-lg group-hover:text-blue-600 transition-colors">{{ item }}</span>
                                     </div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300 group-hover:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-300 group-hover:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- โหมดแก้ไขข้อมูล -->
-                    <div v-else class="space-y-4">
+                    <div v-else class="space-y-5 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">ชื่อร้านค้า</label>
-                            <input type="text" v-model="modals.vendor.editData.Vendor_Name" class="w-full border-2 border-gray-300 rounded-lg p-2.5 font-bold focus:border-gray-800 outline-none">
+                            <label class="block text-sm font-bold text-gray-600 mb-2">ชื่อร้านค้า</label>
+                            <input type="text" v-model="activeVendorData.editData.Vendor_Name" class="w-full border-2 border-gray-300 rounded-xl p-3 font-bold focus:border-gray-800 outline-none text-lg">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">เบอร์โทรศัพท์</label>
-                            <input type="text" v-model="modals.vendor.editData.Phone" class="w-full border-2 border-gray-300 rounded-lg p-2.5 focus:border-blue-500 outline-none">
+                            <label class="block text-sm font-bold text-gray-600 mb-2">เบอร์โทรศัพท์</label>
+                            <input type="text" v-model="activeVendorData.editData.Phone" class="w-full border-2 border-gray-300 rounded-xl p-3 focus:border-blue-500 outline-none text-lg">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">LINE ID</label>
-                            <input type="text" v-model="modals.vendor.editData.Line_ID" class="w-full border-2 border-gray-300 rounded-lg p-2.5 focus:border-green-500 outline-none">
+                            <label class="block text-sm font-bold text-gray-600 mb-2">LINE ID</label>
+                            <input type="text" v-model="activeVendorData.editData.Line_ID" class="w-full border-2 border-gray-300 rounded-xl p-3 focus:border-green-500 outline-none text-lg">
                         </div>
                         
-                        <div class="flex gap-2 pt-4">
-                            <button @click="modals.vendor.isEditing = false; modals.vendor.isConfirmingDelete = false" class="flex-1 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-xl transition-colors">ยกเลิก</button>
-                            <button @click="saveVendorEdit" class="flex-1 py-3 bg-gray-800 hover:bg-black text-white font-bold rounded-xl transition-colors">💾 บันทึกการแก้ไข</button>
+                        <div class="flex gap-3 pt-4">
+                            <button @click="activeVendorData.isEditing = false; activeVendorData.isConfirmingDelete = false" class="flex-1 py-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-xl transition-colors">ยกเลิก</button>
+                            <button @click="saveVendorEdit" class="flex-1 py-4 bg-gray-800 hover:bg-black text-white font-bold rounded-xl transition-colors shadow-md">💾 บันทึกการแก้ไข</button>
                         </div>
 
                         <!-- Delete Vendor Section -->
-                        <div class="mt-4 pt-4 border-t border-gray-200">
-                            <div v-if="!modals.vendor.isConfirmingDelete" class="text-right">
-                                <button @click="modals.vendor.isConfirmingDelete = true" class="text-red-500 hover:text-red-700 font-bold text-sm flex items-center gap-1 transition-colors ml-auto">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        <div class="mt-6 pt-6 border-t border-gray-200">
+                            <div v-if="!activeVendorData.isConfirmingDelete" class="text-center">
+                                <button @click="activeVendorData.isConfirmingDelete = true" class="text-red-500 hover:text-red-700 font-bold flex items-center justify-center gap-2 transition-colors mx-auto px-4 py-2 hover:bg-red-50 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                     ลบร้านค้านี้ออกจากระบบ
                                 </button>
                             </div>
-                            <div v-else class="bg-red-50 p-4 rounded-xl border border-red-200 text-center animate-[fadeIn_0.2s_ease-out]">
-                                <p class="text-red-700 font-bold mb-3">คุณแน่ใจหรือไม่ที่จะลบร้านค้านี้?</p>
-                                <p class="text-xs text-red-500 mb-4">ข้อมูลร้านค้าจะหายไป และจะถูกถอดออกจากอะไหล่ทุกชิ้นที่ผูกไว้</p>
-                                <div class="flex gap-2">
-                                    <button @click="modals.vendor.isConfirmingDelete = false" class="flex-1 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold rounded-lg transition-colors text-sm">ยกเลิก</button>
-                                    <button @click="deleteVendor" class="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors text-sm">ยืนยันการลบ</button>
+                            <div v-else class="bg-red-50 p-5 rounded-2xl border border-red-200 text-center animate-[fadeIn_0.2s_ease-out]">
+                                <p class="text-red-700 font-bold mb-2 text-lg">คุณแน่ใจหรือไม่ที่จะลบร้านค้านี้?</p>
+                                <p class="text-sm text-red-500 mb-5">ข้อมูลร้านค้าจะหายไป และจะถูกถอดออกจากอะไหล่ทุกชิ้นที่เคยผูกไว้</p>
+                                <div class="flex gap-3">
+                                    <button @click="activeVendorData.isConfirmingDelete = false" class="flex-1 py-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition-colors">ยกเลิก</button>
+                                    <button @click="deleteVendor" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-md">ยืนยันการลบ</button>
                                 </div>
                             </div>
                         </div>
@@ -361,127 +392,127 @@
 
                 </div>
             </div>
-        </div>
 
-        <!-- ========================================== -->
-        <!-- POPUP 3: เพิ่มข้อมูลใหม่ (Create Modal) -->
-        <!-- ========================================== -->
-        <div v-if="modals.create.show" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="modals.create.show = false">
-            <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+            <!-- ========================================== -->
+            <!-- VIEW: หน้าเพิ่มข้อมูลใหม่ (Create View) -->
+            <!-- ========================================== -->
+            <div v-else-if="viewState === 'createView'" class="bg-white rounded-3xl shadow-xl overflow-hidden animate-[fadeIn_0.2s_ease-out]">
                 
-                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                    <h3 class="text-xl font-bold text-gray-800">
-                        {{ searchMode === 'item' ? '➕ เพิ่มอะไหล่ใหม่' : '➕ เพิ่มร้านค้าใหม่' }}
-                    </h3>
-                    <button @click="modals.create.show = false" class="text-gray-400 hover:text-gray-600">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <div class="bg-green-600 p-6 sm:p-8 text-white relative">
+                    <button @click="goBack" class="absolute top-6 left-6 text-white bg-black/20 hover:bg-black/40 px-3 py-1.5 rounded-full text-sm font-bold transition-colors flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                        ยกเลิก
                     </button>
+                    <div class="mt-8 text-center">
+                        <div class="inline-block bg-white/20 p-4 rounded-full mb-3 backdrop-blur-sm shadow-inner">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                        </div>
+                        <h2 class="text-3xl font-bold">{{ searchMode === 'item' ? 'เพิ่มอะไหล่ใหม่' : 'เพิ่มร้านค้าใหม่' }}</h2>
+                    </div>
                 </div>
 
-                <!-- Form เพิ่มอะไหล่ (เลือกร้านค้าได้หลายร้าน) -->
-                <div v-if="searchMode === 'item'" class="p-6 space-y-4">
+                <!-- Form เพิ่มอะไหล่ -->
+                <div v-if="searchMode === 'item'" class="p-6 sm:p-10 space-y-6 bg-gray-50">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">ชื่ออะไหล่และอุปกรณ์ <span class="text-red-500">*</span></label>
-                        <input type="text" v-model="modals.create.newItem.name" placeholder="เช่น ไส้กรองแอร์, สายพานไทม์มิ่ง" 
-                               class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 outline-none">
+                        <label class="block text-base font-bold text-gray-700 mb-2">ชื่ออะไหล่และอุปกรณ์ <span class="text-red-500">*</span></label>
+                        <input type="text" v-model="createData.newItem.name" placeholder="เช่น ไส้กรองแอร์, สายพานไทม์มิ่ง" 
+                               class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-blue-500 outline-none text-lg bg-white shadow-sm">
                         
-                        <!-- 🌟 แจ้งเตือนรายการซ้ำแบบ Real-time -->
-                        <div v-if="existingItemMatch" class="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 animate-[fadeIn_0.2s_ease-out]">
-                            <div class="bg-red-100 p-2 rounded-lg text-red-600 shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                        <!-- แจ้งเตือนรายการซ้ำ -->
+                        <div v-if="existingItemMatch" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-4 animate-[fadeIn_0.2s_ease-out]">
+                            <div class="bg-red-100 p-3 rounded-xl text-red-600 shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                             </div>
                             <div>
-                                <p class="text-sm font-bold text-red-700">มีรายการนี้ในระบบแล้ว!</p>
-                                <p class="text-xs text-red-600 mb-2">ชื่อที่ตรงกัน: <span class="font-bold">{{ getItemName(existingItemMatch) }}</span></p>
-                                <button @click="openExistingItemFromCreate" class="bg-white border border-red-200 hover:bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm">
+                                <p class="text-base font-bold text-red-700 mb-1">มีรายการนี้ในระบบแล้ว!</p>
+                                <p class="text-sm text-red-600 mb-3">ตรงกับ: <span class="font-bold">{{ getItemName(existingItemMatch) }}</span></p>
+                                <button @click="openExistingItemFromCreate" class="bg-white border border-red-200 hover:bg-red-100 text-red-700 px-4 py-2 rounded-xl text-sm font-bold transition-colors shadow-sm">
                                     เปิดดูข้อมูลเดิมแทน
                                 </button>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="pt-2 border-t border-gray-100">
-                        <label class="block text-sm font-bold text-gray-700 mb-2">เลือกร้านค้าจำหน่าย (เลือกได้หลายร้าน) <span class="text-red-500">*</span></label>
+                    <div class="pt-4 border-t border-gray-200">
+                        <label class="block text-base font-bold text-gray-700 mb-3">เลือกร้านค้าจำหน่าย (เลือกได้หลายร้าน) <span class="text-red-500">*</span></label>
                         
-                        <!-- แสดงร้านค้าที่ถูกเลือกไว้ (เป็นป้าย Tags) -->
-                        <div class="flex flex-wrap gap-2 mb-3 min-h-[32px]">
-                            <span v-if="modals.create.newItem.vendors.length === 0" class="text-sm text-gray-400 italic">ยังไม่ได้เลือกร้านค้า</span>
-                            <span v-for="(v, vIndex) in modals.create.newItem.vendors" :key="vIndex" 
-                                  class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 shadow-sm">
+                        <div class="flex flex-wrap gap-2 mb-4 min-h-[40px] p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+                            <span v-if="createData.newItem.vendors.length === 0" class="text-gray-400 italic">ยังไม่ได้เลือกร้านค้า...</span>
+                            <span v-for="(v, vIndex) in createData.newItem.vendors" :key="vIndex" 
+                                  class="bg-blue-100 text-blue-700 px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm">
                                 {{ v }}
-                                <button @click="modals.create.newItem.vendors.splice(vIndex, 1)" class="hover:text-red-600 hover:bg-white rounded-full p-0.5 ml-1 transition-colors">
+                                <button @click="createData.newItem.vendors.splice(vIndex, 1)" class="hover:text-red-600 hover:bg-white rounded-full p-1 transition-colors">
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                                 </button>
                             </span>
                         </div>
 
-                        <!-- Searchable Dropdown สำหรับเลือกร้านเพิ่ม -->
                         <div class="relative">
-                            <div v-if="modals.create.newItem.showVendorDropdown" class="fixed inset-0 z-10" @click="modals.create.newItem.showVendorDropdown = false"></div>
+                            <div v-if="createData.newItem.showVendorDropdown" class="fixed inset-0 z-10" @click="createData.newItem.showVendorDropdown = false"></div>
                             <div class="relative z-20">
-                                <input type="text" v-model="modals.create.newItem.vendorSearchQuery" @focus="modals.create.newItem.showVendorDropdown = true" 
+                                <input type="text" v-model="createData.newItem.vendorSearchQuery" @focus="createData.newItem.showVendorDropdown = true" 
                                        placeholder="พิมพ์ค้นหา หรือเลือกร้านค้า..." 
-                                       class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 outline-none bg-white font-medium text-gray-700">
-                                <div v-if="modals.create.newItem.showVendorDropdown" class="absolute w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto py-1">
-                                    <div v-if="filteredAvailableVendorsForNewItem.length === 0" class="p-3 text-gray-500 text-sm italic">ไม่พบร้านค้าที่ค้นหา</div>
-                                    <div v-for="v in filteredAvailableVendorsForNewItem" :key="v" @click="selectVendorForNewItem(v)" class="p-3 hover:bg-blue-50 cursor-pointer text-gray-700 font-medium border-b border-gray-50 last:border-0">
+                                       class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-blue-500 outline-none bg-white font-medium text-gray-700 text-lg shadow-sm">
+                                <div v-if="createData.newItem.showVendorDropdown" class="absolute w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto py-2">
+                                    <div v-if="filteredAvailableVendorsForNewItem.length === 0" class="p-4 text-gray-500 italic text-center">ไม่พบร้านค้าที่ค้นหา</div>
+                                    <div v-for="v in filteredAvailableVendorsForNewItem" :key="v" @click="selectVendorForNewItem(v)" class="p-4 hover:bg-blue-50 cursor-pointer text-gray-800 font-medium border-b border-gray-50 last:border-0">
                                         {{ v }}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <p class="text-xs text-gray-400 mt-2">หากไม่มีร้านในตัวเลือก ให้ไปเพิ่ม "ข้อมูลร้านค้า" ก่อนครับ</p>
+                        <p class="text-sm text-gray-500 mt-3 text-center">หากไม่มีร้านในตัวเลือก ให้ไป <span class="text-orange-600 font-bold cursor-pointer hover:underline" @click="searchMode='vendor'; createData.newItem.name='';">เพิ่มข้อมูลร้านค้า</span> ก่อน</p>
                     </div>
 
-                    <button @click="createNewItem" :disabled="!modals.create.newItem.name.trim() || modals.create.newItem.vendors.length === 0 || existingItemMatch"
-                            class="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors mt-2 shadow-md">
+                    <button @click="createNewItem" :disabled="!createData.newItem.name.trim() || createData.newItem.vendors.length === 0 || existingItemMatch"
+                            class="w-full py-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors mt-6 shadow-md text-lg">
                         บันทึกลงฐานข้อมูล
                     </button>
                 </div>
 
                 <!-- Form เพิ่มร้านค้า -->
-                <div v-if="searchMode === 'vendor'" class="p-6 space-y-4">
+                <div v-if="searchMode === 'vendor'" class="p-6 sm:p-10 space-y-6 bg-gray-50">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">ชื่อร้านค้า <span class="text-red-500">*</span></label>
-                        <input type="text" v-model="modals.create.newVendor.name" placeholder="ระบุชื่อร้าน" 
-                               class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-orange-500 outline-none">
+                        <label class="block text-base font-bold text-gray-700 mb-2">ชื่อร้านค้า <span class="text-red-500">*</span></label>
+                        <input type="text" v-model="createData.newVendor.name" placeholder="ระบุชื่อร้าน" 
+                               class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-orange-500 outline-none text-lg shadow-sm bg-white">
                                
-                        <!-- 🌟 แจ้งเตือนร้านค้าซ้ำแบบ Real-time -->
-                        <div v-if="existingVendorMatch" class="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 animate-[fadeIn_0.2s_ease-out]">
-                            <div class="bg-red-100 p-2 rounded-lg text-red-600 shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                        <!-- แจ้งเตือนร้านค้าซ้ำ -->
+                        <div v-if="existingVendorMatch" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-4 animate-[fadeIn_0.2s_ease-out]">
+                            <div class="bg-red-100 p-3 rounded-xl text-red-600 shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                             </div>
                             <div>
-                                <p class="text-sm font-bold text-red-700">มีชื่อร้านค้านี้ในระบบแล้ว!</p>
-                                <p class="text-xs text-red-600 mb-2">ชื่อที่ตรงกัน: <span class="font-bold">{{ getVendorName(existingVendorMatch) }}</span></p>
-                                <button @click="openExistingVendorFromCreate" class="bg-white border border-red-200 hover:bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm">
+                                <p class="text-base font-bold text-red-700 mb-1">มีชื่อร้านค้านี้ในระบบแล้ว!</p>
+                                <p class="text-sm text-red-600 mb-3">ตรงกับ: <span class="font-bold">{{ getVendorName(existingVendorMatch) }}</span></p>
+                                <button @click="openExistingVendorFromCreate" class="bg-white border border-red-200 hover:bg-red-100 text-red-700 px-4 py-2 rounded-xl text-sm font-bold transition-colors shadow-sm">
                                     เปิดดูข้อมูลเดิมแทน
                                 </button>
                             </div>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">เบอร์โทรศัพท์</label>
-                        <input type="text" v-model="modals.create.newVendor.phone" placeholder="เช่น 081-xxx-xxxx" 
-                               class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-orange-500 outline-none">
+                        <label class="block text-base font-bold text-gray-700 mb-2">เบอร์โทรศัพท์</label>
+                        <input type="text" v-model="createData.newVendor.phone" placeholder="เช่น 081-xxx-xxxx" 
+                               class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-orange-500 outline-none text-lg shadow-sm bg-white">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">LINE ID</label>
-                        <input type="text" v-model="modals.create.newVendor.line" placeholder="เช่น @shopname" 
-                               class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-orange-500 outline-none">
+                        <label class="block text-base font-bold text-gray-700 mb-2">LINE ID</label>
+                        <input type="text" v-model="createData.newVendor.line" placeholder="เช่น @shopname" 
+                               class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-orange-500 outline-none text-lg shadow-sm bg-white">
                     </div>
-                    <button @click="createNewVendor" :disabled="!modals.create.newVendor.name.trim() || existingVendorMatch"
-                            class="w-full py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors mt-2 shadow-md">
+                    <button @click="createNewVendor" :disabled="!createData.newVendor.name.trim() || existingVendorMatch"
+                            class="w-full py-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors mt-6 shadow-md text-lg">
                         บันทึกลงฐานข้อมูล
                     </button>
                 </div>
             </div>
-        </div>
 
+        </template>
     </div>
 
     <script>
-        const { createApp, ref, computed, onMounted } = Vue;
+        const { createApp, ref, computed, onMounted, watch } = Vue;
 
         createApp({
             setup() {
@@ -501,17 +532,32 @@
                 const vendors = ref([]);
                 
                 const searchText = ref('');
-                const searchMode = ref('item'); 
+                const searchMode = ref('item'); // 'item' หรือ 'vendor'
+                
+                // ระบบเปลี่ยนหน้า (Views) และประวัติ
+                const viewState = ref('home'); // home, itemDetail, vendorDetail, createView
+                const viewHistory = ref([]);
                 
                 const systemMessage = ref({ show: false, text: '', isError: false });
-                let zIndexCounter = 50; 
 
-                const modals = ref({
-                    item: { show: false, itemName: '', vendors: [], selectedVendorToAdd: '', vendorSearchQuery: '', showVendorDropdown: false, zIndex: 50 },
-                    vendor: { show: false, info: { Items_Sold: [] }, isEditing: false, editData: {}, isConfirmingDelete: false, zIndex: 50 },
-                    // เปลี่ยน vendor ของ newItem เป็น array `vendors` เพื่อเก็บหลายร้าน
-                    create: { show: false, newItem: { name: '', vendors: [], tempVendor: '', vendorSearchQuery: '', showVendorDropdown: false }, newVendor: { name: '', phone: '', line: '' } }
-                });
+                // ข้อมูลสำหรับแต่ละ View
+                const activeItemData = ref({ itemName: '', vendors: [], selectedVendorToAdd: '', vendorSearchQuery: '', showVendorDropdown: false, isConfirmingDelete: false });
+                const activeVendorData = ref({ info: { Items_Sold: [] }, isEditing: false, editData: {}, isConfirmingDelete: false });
+                const createData = ref({ newItem: { name: '', vendors: [], tempVendor: '', vendorSearchQuery: '', showVendorDropdown: false }, newVendor: { name: '', phone: '', line: '' } });
+
+                // Pagination (โหลดเพิ่มเติม)
+                const itemsPerPage = 20;
+                const itemsLimit = ref(itemsPerPage);
+                const vendorsLimit = ref(itemsPerPage);
+
+                const resetPagination = () => {
+                    itemsLimit.value = itemsPerPage;
+                    vendorsLimit.value = itemsPerPage;
+                };
+
+                const loadMoreItems = () => itemsLimit.value += itemsPerPage;
+                const loadMoreVendors = () => vendorsLimit.value += itemsPerPage;
+
 
                 const showMessage = (text, isError = false) => {
                     systemMessage.value = { show: true, text, isError };
@@ -570,25 +616,24 @@
                 });
 
                 const getAvailableVendorsToAdd = () => {
-                    const currentVendors = modals.value.item.vendors;
+                    const currentVendors = activeItemData.value.vendors;
                     return allVendorNames.value.filter(name => !currentVendors.includes(name));
                 };
 
-                // คำนวณร้านค้าที่เหลือให้เลือกในหน้าต่าง สร้างอะไหล่ใหม่
                 const availableVendorsForNewItem = computed(() => {
-                    return allVendorNames.value.filter(name => !modals.value.create.newItem.vendors.includes(name));
+                    return allVendorNames.value.filter(name => !createData.value.newItem.vendors.includes(name));
                 });
 
                 const filteredAvailableVendorsForNewItem = computed(() => {
                     let available = availableVendorsForNewItem.value;
-                    let query = modals.value.create.newItem.vendorSearchQuery.trim().toLowerCase();
+                    let query = createData.value.newItem.vendorSearchQuery.trim().toLowerCase();
                     if(query) return available.filter(v => normalizeText(v).includes(normalizeText(query)));
                     return available;
                 });
 
                 const filteredAvailableVendorsForItemModal = computed(() => {
                     let available = getAvailableVendorsToAdd();
-                    let query = modals.value.item.vendorSearchQuery.trim().toLowerCase();
+                    let query = activeItemData.value.vendorSearchQuery.trim().toLowerCase();
                     if(query) return available.filter(v => normalizeText(v).includes(normalizeText(query)));
                     return available;
                 });
@@ -597,56 +642,119 @@
                 // ระบบเช็คข้อมูลซ้ำ (Duplicate Check)
                 // ==========================================
                 const existingItemMatch = computed(() => {
-                    const name = modals.value.create.newItem.name.trim();
+                    const name = createData.value.newItem.name.trim();
                     if (!name) return null;
                     const normName = normalizeText(name);
                     return items.value.find(i => normalizeText(getItemName(i)) === normName);
                 });
 
                 const existingVendorMatch = computed(() => {
-                    const name = modals.value.create.newVendor.name.trim();
+                    const name = createData.value.newVendor.name.trim();
                     if (!name) return null;
                     const normName = normalizeText(name);
                     return vendors.value.find(v => normalizeText(getVendorName(v)) === normName);
                 });
 
+
+                // ==========================================
+                // Navigation (เปลี่ยนหน้า)
+                // ==========================================
+                const navigateTo = (view) => {
+                    if (viewState.value !== view) {
+                        viewHistory.value.push(viewState.value);
+                    }
+                    viewState.value = view;
+                    window.scrollTo(0, 0);
+                };
+
+                const goBack = () => {
+                    if (viewHistory.value.length > 0) {
+                        viewState.value = viewHistory.value.pop();
+                    } else {
+                        viewState.value = 'home';
+                    }
+                    window.scrollTo(0, 0);
+                };
+
+                const goToHome = () => {
+                    viewHistory.value = [];
+                    viewState.value = 'home';
+                    window.scrollTo(0, 0);
+                };
+
+                const openItem = (itemObj) => {
+                    const itemName = typeof itemObj === 'string' ? itemObj : getItemName(itemObj);
+                    let itemVendors = [];
+                    const actualItemObj = typeof itemObj === 'string' ? items.value.find(i => getItemName(i) === itemName) : itemObj;
+                    
+                    if (actualItemObj) {
+                        for (let key in actualItemObj) {
+                            if (key.includes('ร้านค้า') || key.includes('ร้านที่') || key.match(/Vendor/i)) {
+                                const vName = actualItemObj[key];
+                                if (vName && vName.trim() !== '') itemVendors.push(vName.trim());
+                            }
+                        }
+                    }
+
+                    activeItemData.value.itemName = itemName;
+                    activeItemData.value.vendors = itemVendors;
+                    activeItemData.value.selectedVendorToAdd = '';
+                    activeItemData.value.isConfirmingDelete = false;
+                    navigateTo('itemDetail');
+                };
+
+                const openVendor = (clickedVendorName) => {
+                    const vendorRow = vendors.value.find(v => getVendorName(v)?.trim() === clickedVendorName.trim());
+
+                    activeVendorData.value.info = {
+                        Vendor_Name: clickedVendorName,
+                        Phone: vendorRow ? (vendorRow['เบอร์โทร'] || vendorRow['เบอร์ติดต่อ'] || vendorRow['โทรศัพท์'] || vendorRow['Phone'] || '') : '',
+                        Line_ID: vendorRow ? (vendorRow['Line'] || vendorRow['Line_ID'] || vendorRow['ไลน์'] || '') : '',
+                        Items_Sold: getItemsSoldByVendor(clickedVendorName)
+                    };
+
+                    activeVendorData.value.isEditing = false;
+                    activeVendorData.value.isConfirmingDelete = false;
+                    navigateTo('vendorDetail');
+                };
+
+                const openCreateView = () => {
+                    createData.value.newItem.name = searchText.value || '';
+                    createData.value.newItem.vendors = []; 
+                    createData.value.newItem.tempVendor = '';
+                    createData.value.newItem.vendorSearchQuery = '';
+                    
+                    createData.value.newVendor.name = searchText.value || '';
+                    createData.value.newVendor.phone = '';
+                    createData.value.newVendor.line = '';
+                    
+                    navigateTo('createView');
+                };
+
                 const openExistingItemFromCreate = () => {
                     const item = existingItemMatch.value;
-                    if (item) {
-                        modals.value.create.show = false;
-                        setTimeout(() => openItem(item), 300);
-                    }
+                    if (item) openItem(item);
                 };
 
                 const openExistingVendorFromCreate = () => {
                     const vendorName = getVendorName(existingVendorMatch.value);
-                    if (vendorName) {
-                        modals.value.create.show = false;
-                        setTimeout(() => openVendor(vendorName), 300);
-                    }
+                    if (vendorName) openVendor(vendorName);
                 };
+
 
                 // ฟังก์ชันกดเลือกร้านค้าเข้าไปอยู่ใน Tag
-                const addVendorToNewItem = () => {
-                    const selected = modals.value.create.newItem.tempVendor;
-                    if (selected && !modals.value.create.newItem.vendors.includes(selected)) {
-                        modals.value.create.newItem.vendors.push(selected);
-                    }
-                    modals.value.create.newItem.tempVendor = ''; // ล้างค่า Dropdown
-                };
-
                 const selectVendorForNewItem = (v) => {
-                    if (!modals.value.create.newItem.vendors.includes(v)) {
-                        modals.value.create.newItem.vendors.push(v);
+                    if (!createData.value.newItem.vendors.includes(v)) {
+                        createData.value.newItem.vendors.push(v);
                     }
-                    modals.value.create.newItem.vendorSearchQuery = '';
-                    modals.value.create.newItem.showVendorDropdown = false;
+                    createData.value.newItem.vendorSearchQuery = '';
+                    createData.value.newItem.showVendorDropdown = false;
                 };
 
                 const selectVendorForItemModal = (v) => {
-                    modals.value.item.selectedVendorToAdd = v;
-                    modals.value.item.vendorSearchQuery = v; 
-                    modals.value.item.showVendorDropdown = false;
+                    activeItemData.value.selectedVendorToAdd = v;
+                    activeItemData.value.vendorSearchQuery = v; 
+                    activeItemData.value.showVendorDropdown = false;
                 };
 
                 // ==========================================
@@ -654,13 +762,11 @@
                 // ==========================================
 
                 const createNewItem = async () => {
-                    const name = modals.value.create.newItem.name.trim();
-                    const vendorArray = modals.value.create.newItem.vendors; // เป็น Array แล้ว
+                    const name = createData.value.newItem.name.trim();
+                    const vendorArray = createData.value.newItem.vendors;
                     
                     isSaving.value = true;
-                    modals.value.create.show = false;
 
-                    // ส่ง API ไปเซฟแบบ Array
                     const response = await sendDataToSheet({
                         action: 'addItem',
                         itemName: name,
@@ -668,20 +774,14 @@
                     });
 
                     if (response.success) {
-                        // อัปเดตหน้าตาเว็บ (Local)
                         const baseKey = items.value.length > 0 ? Object.keys(items.value[0]).find(k => k.includes('สินค้า') || k.includes('Item')) || 'Item_Name' : 'Item_Name';
                         let newObj = { [baseKey]: name };
-                        
-                        // เอาชื่อร้านมาหยอดใส่คอลัมน์ ร้านค้าที่ 1, 2, 3 ...
-                        vendorArray.forEach((v, idx) => {
-                            newObj[`ร้านค้าที่ ${idx + 1}`] = v;
-                        });
-
+                        vendorArray.forEach((v, idx) => { newObj[`ร้านค้าที่ ${idx + 1}`] = v; });
                         items.value.unshift(newObj); 
                         
-                        showMessage(`เพิ่มอะไหล่ "${name}" พร้อมร้านค้าเรียบร้อย`);
+                        showMessage(`เพิ่มอะไหล่ "${name}" เรียบร้อย`);
                         searchText.value = name;
-                        modals.value.create.newItem = { name: '', vendors: [], tempVendor: '', vendorSearchQuery: '', showVendorDropdown: false }; // ล้างฟอร์ม
+                        goToHome();
                     } else {
                         showMessage(response.message || 'ไม่สามารถบันทึกได้', true);
                     }
@@ -689,10 +789,8 @@
                 };
 
                 const createNewVendor = async () => {
-                    const vData = modals.value.create.newVendor;
-                    
+                    const vData = createData.value.newVendor;
                     isSaving.value = true;
-                    modals.value.create.show = false;
 
                     const response = await sendDataToSheet({
                         action: 'addVendor',
@@ -702,17 +800,15 @@
                     });
 
                     if (response.success) {
-                        // แก้ปัญหาเพิ่มร้านแล้วใช้ไม่ได้ทันที โดยตั้งชื่อ Key ให้ตรงกับ A, B, C เป๊ะๆ
                         let newObj = {
-                            'Vendor_Name': vData.name.trim(), // บังคับให้เป็นชื่อนี้เลย
+                            'Vendor_Name': vData.name.trim(),
                             'Phone': vData.phone.trim() || '-',
                             'Line_ID': vData.line.trim() || '-'
                         };
                         vendors.value.unshift(newObj);
-                        
-                        showMessage(`เพิ่มร้านค้า "${vData.name}" เข้าระบบเรียบร้อย`);
+                        showMessage(`เพิ่มร้านค้า "${vData.name}" เรียบร้อย`);
                         searchText.value = vData.name;
-                        modals.value.create.newVendor = { name: '', phone: '', line: '' }; // ล้างฟอร์ม
+                        goToHome();
                     } else {
                         showMessage(response.message || 'ไม่สามารถบันทึกได้', true);
                     }
@@ -720,19 +816,18 @@
                 };
 
                 const startEditVendor = () => {
-                    modals.value.vendor.editData = { ...modals.value.vendor.info }; 
-                    modals.value.vendor.isEditing = true;
-                    modals.value.vendor.isConfirmingDelete = false;
+                    activeVendorData.value.editData = { ...activeVendorData.value.info }; 
+                    activeVendorData.value.isEditing = true;
+                    activeVendorData.value.isConfirmingDelete = false;
                 };
 
                 const saveVendorEdit = async () => {
-                    const oldName = modals.value.vendor.info.Vendor_Name;
-                    const newData = modals.value.vendor.editData;
+                    const oldName = activeVendorData.value.info.Vendor_Name;
+                    const newData = activeVendorData.value.editData;
                     const newName = newData.Vendor_Name.trim();
 
                     isSaving.value = true;
-                    modals.value.vendor.isEditing = false;
-                    modals.value.vendor.show = false;
+                    activeVendorData.value.isEditing = false;
 
                     const response = await sendDataToSheet({
                         action: 'updateVendor',
@@ -740,19 +835,17 @@
                         newVendorName: newName,
                         phone: newData.Phone || '-',
                         line: newData.Line_ID || '-',
-                        other: '-' // นำออกไปแล้วตามคำขอ 3 คอลัมน์
+                        other: '-'
                     });
 
                     if (response.success) {
                         const vIndex = vendors.value.findIndex(v => getVendorName(v) === oldName);
                         if (vIndex !== -1) {
                             const dbVendorNameKey = Object.keys(vendors.value[vIndex]).find(k => k.includes('ร้าน') || k.includes('Vendor')) || 'Vendor_Name';
-                            
                             vendors.value[vIndex][dbVendorNameKey] = newName;
                             vendors.value[vIndex]['Phone'] = newData.Phone || '-';
                             vendors.value[vIndex]['Line_ID'] = newData.Line_ID || '-';
 
-                            // แก้ไขชื่อร้านที่ผูกกับอะไหล่ใน Local
                             if (oldName !== newName) {
                                 items.value.forEach(itemObj => {
                                     for (let key in itemObj) {
@@ -760,6 +853,10 @@
                                     }
                                 });
                             }
+                            // Update local view
+                            activeVendorData.value.info.Vendor_Name = newName;
+                            activeVendorData.value.info.Phone = newData.Phone;
+                            activeVendorData.value.info.Line_ID = newData.Line_ID;
                             showMessage(`อัปเดตข้อมูลร้านค้าเรียบร้อย`);
                         }
                     } else {
@@ -769,12 +866,8 @@
                 };
 
                 const deleteVendor = async () => {
-                    const vendorNameToDelete = modals.value.vendor.info.Vendor_Name;
-
+                    const vendorNameToDelete = activeVendorData.value.info.Vendor_Name;
                     isSaving.value = true;
-                    modals.value.vendor.isEditing = false;
-                    modals.value.vendor.isConfirmingDelete = false;
-                    modals.value.vendor.show = false;
 
                     const response = await sendDataToSheet({
                         action: 'deleteVendor',
@@ -783,27 +876,43 @@
 
                     if (response.success) {
                         vendors.value = vendors.value.filter(v => getVendorName(v) !== vendorNameToDelete);
-
                         items.value.forEach(itemObj => {
                             for (let key in itemObj) {
-                                if (itemObj[key] === vendorNameToDelete) {
-                                    itemObj[key] = '';
-                                }
+                                if (itemObj[key] === vendorNameToDelete) itemObj[key] = '';
                             }
                         });
-                        
                         showMessage(`ลบร้านค้า "${vendorNameToDelete}" ออกจากระบบแล้ว`);
                         if(searchText.value === vendorNameToDelete) searchText.value = '';
+                        goToHome();
                     } else {
                         showMessage(response.message || 'ไม่สามารถลบได้', true);
                     }
                     isSaving.value = false;
                 };
 
+                // ลบรายการอะไหล่ทิ้งทั้งบรรทัด (เพิ่มใหม่)
+                const deleteItem = async () => {
+                    const itemNameToDelete = activeItemData.value.itemName;
+                    isSaving.value = true;
+
+                    const response = await sendDataToSheet({
+                        action: 'deleteItem',
+                        itemName: itemNameToDelete
+                    });
+
+                    if (response.success) {
+                        items.value = items.value.filter(i => getItemName(i) !== itemNameToDelete);
+                        showMessage(`ลบรายการอะไหล่ "${itemNameToDelete}" ออกจากระบบแล้ว`);
+                        if(searchText.value === itemNameToDelete) searchText.value = '';
+                        goToHome();
+                    } else {
+                        showMessage(response.message || 'ไม่สามารถลบอะไหล่ได้', true);
+                    }
+                    isSaving.value = false;
+                }
+
                 const removeVendorFromItem = async (vendorNameToRemove) => {
-                    const itemName = modals.value.item.itemName;
-                    
-                    modals.value.item.show = false;
+                    const itemName = activeItemData.value.itemName;
                     isSaving.value = true;
 
                     const response = await sendDataToSheet({
@@ -820,6 +929,8 @@
                                     items.value[itemIndex][key] = ''; 
                                 }
                             }
+                            // Update local view
+                            activeItemData.value.vendors = activeItemData.value.vendors.filter(v => v !== vendorNameToRemove);
                             showMessage(`ลบร้านออกจากอะไหล่เรียบร้อย`);
                         }
                     } else {
@@ -829,10 +940,8 @@
                 };
 
                 const addVendorToItem = async () => {
-                    const vendorToAdd = modals.value.item.selectedVendorToAdd;
-                    const itemName = modals.value.item.itemName;
-
-                    modals.value.item.show = false;
+                    const vendorToAdd = activeItemData.value.selectedVendorToAdd;
+                    const itemName = activeItemData.value.itemName;
                     isSaving.value = true;
 
                     const response = await sendDataToSheet({
@@ -856,9 +965,10 @@
                                 emptyKey = `ร้านค้าที่ ${newKeyNum}`;
                             }
                             items.value[itemIndex][emptyKey] = vendorToAdd;
+                            activeItemData.value.vendors.push(vendorToAdd);
+                            activeItemData.value.selectedVendorToAdd = '';
+                            activeItemData.value.vendorSearchQuery = '';
                             showMessage(`เพิ่มร้านค้าลงในอะไหล่เรียบร้อย`);
-                            modals.value.item.selectedVendorToAdd = '';
-                            modals.value.item.vendorSearchQuery = '';
                         }
                     } else {
                         showMessage(response.message || 'ไม่สามารถเพิ่มได้', true);
@@ -866,21 +976,9 @@
                     isSaving.value = false;
                 };
 
-                const openCreateModal = () => {
-                    modals.value.create.newItem.name = searchText.value || '';
-                    modals.value.create.newItem.vendors = []; // ล้างค่าเผื่อไว้
-                    modals.value.create.newItem.tempVendor = '';
-                    modals.value.create.newItem.vendorSearchQuery = '';
-                    
-                    modals.value.create.newVendor.name = searchText.value || '';
-                    modals.value.create.newVendor.phone = '';
-                    modals.value.create.newVendor.line = '';
-                    
-                    modals.value.create.show = true;
-                };
 
                 // ==========================================
-                // Search Logic
+                // Search Logic (พร้อม Pagination)
                 // ==========================================
                 const filteredItems = computed(() => {
                     const validItems = items.value.filter(item => getItemName(item)?.trim());
@@ -924,47 +1022,9 @@
                     return merged;
                 });
 
-                // ==========================================
-                // Modal Handlers
-                // ==========================================
-                const openItem = (itemObj) => {
-                    const itemName = typeof itemObj === 'string' ? itemObj : getItemName(itemObj);
-                    let itemVendors = [];
-                    const actualItemObj = typeof itemObj === 'string' ? items.value.find(i => getItemName(i) === itemName) : itemObj;
-                    
-                    if (actualItemObj) {
-                        for (let key in actualItemObj) {
-                            if (key.includes('ร้านค้า') || key.includes('ร้านที่') || key.match(/Vendor/i)) {
-                                const vName = actualItemObj[key];
-                                if (vName && vName.trim() !== '') itemVendors.push(vName.trim());
-                            }
-                        }
-                    }
-
-                    modals.value.item.itemName = itemName;
-                    modals.value.item.vendors = itemVendors;
-                    modals.value.item.selectedVendorToAdd = '';
-                    modals.value.item.zIndex = ++zIndexCounter;
-                    modals.value.item.show = true;
-                };
-
-                const openVendor = (clickedVendorName) => {
-                    const vendorRow = vendors.value.find(v => getVendorName(v)?.trim() === clickedVendorName.trim());
-
-                    modals.value.vendor.info = {
-                        Vendor_Name: clickedVendorName,
-                        Phone: vendorRow ? (vendorRow['เบอร์โทร'] || vendorRow['เบอร์ติดต่อ'] || vendorRow['โทรศัพท์'] || vendorRow['Phone'] || '') : '',
-                        Line_ID: vendorRow ? (vendorRow['Line'] || vendorRow['Line_ID'] || vendorRow['ไลน์'] || '') : '',
-                        Items_Sold: getItemsSoldByVendor(clickedVendorName)
-                    };
-
-                    modals.value.vendor.isEditing = false;
-                    modals.value.vendor.zIndex = ++zIndexCounter;
-                    modals.value.vendor.show = true;
-                };
-
-                const closeItemModalOnly = () => { modals.value.item.show = false; };
-                const closeVendorModalOnly = () => { modals.value.vendor.show = false; modals.value.vendor.isEditing = false; modals.value.vendor.isConfirmingDelete = false; };
+                // สำหรับนำไปโชว์ทีละ 20 รายการ
+                const displayedItems = computed(() => filteredItems.value.slice(0, itemsLimit.value));
+                const displayedVendors = computed(() => filteredVendors.value.slice(0, vendorsLimit.value));
 
                 // ==========================================
                 // Load CSV
@@ -984,14 +1044,14 @@
                 });
 
                 return {
-                    isLoading, isSaving, searchText, searchMode, systemMessage,
-                    filteredItems, filteredVendors, allVendorNames, availableVendorsForNewItem,
-                    filteredAvailableVendorsForNewItem, filteredAvailableVendorsForItemModal,
+                    isLoading, isSaving, searchText, searchMode, systemMessage, viewState,
+                    filteredItems, filteredVendors, displayedItems, displayedVendors, loadMoreItems, loadMoreVendors, resetPagination,
+                    allVendorNames, availableVendorsForNewItem, filteredAvailableVendorsForNewItem, filteredAvailableVendorsForItemModal,
                     existingItemMatch, existingVendorMatch, openExistingItemFromCreate, openExistingVendorFromCreate,
-                    modals, getItemName, getVendorName, getAvailableVendorsToAdd,
-                    openItem, openVendor, closeItemModalOnly, closeVendorModalOnly, addVendorToNewItem,
-                    selectVendorForNewItem, selectVendorForItemModal, deleteVendor,
-                    createNewItem, createNewVendor, startEditVendor, saveVendorEdit, removeVendorFromItem, addVendorToItem, openCreateModal
+                    activeItemData, activeVendorData, createData, getItemName, getVendorName, getAvailableVendorsToAdd,
+                    openItem, openVendor, openCreateView, goBack, navigateTo,
+                    selectVendorForNewItem, selectVendorForItemModal, deleteVendor, deleteItem,
+                    createNewItem, createNewVendor, startEditVendor, saveVendorEdit, removeVendorFromItem, addVendorToItem
                 };
             }
         }).mount('#app');
