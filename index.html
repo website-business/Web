@@ -32,15 +32,15 @@
     <div id="app" class="w-full max-w-3xl">
         
         <!-- System Message -->
-        <div v-if="systemMessage.show" class="mb-4 p-4 rounded-xl flex items-center gap-3 transition-all shadow-md sticky top-4 z-50" :class="systemMessage.isError ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'">
+        <div v-if="systemMessage.show" class="mb-4 p-4 rounded-xl flex items-center gap-3 transition-all shadow-md sticky top-4 z-50 animate-[fadeIn_0.3s_ease-out]" :class="systemMessage.isError ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'">
             <svg v-if="!systemMessage.isError" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <p class="font-medium">{{ systemMessage.text }}</p>
+            <p class="font-medium text-sm md:text-base">{{ systemMessage.text }}</p>
         </div>
 
         <!-- Loading Global -->
-        <div v-if="isLoading || isSaving" class="text-center py-20 bg-white rounded-3xl shadow-lg mb-6">
+        <div v-if="isLoading || isSaving" class="text-center py-20 bg-white rounded-3xl shadow-lg mb-6 flex flex-col items-center justify-center">
             <div class="animate-spin inline-block w-12 h-12 border-[4px] border-current border-t-transparent text-blue-600 rounded-full" role="status"></div>
-            <p class="mt-4 text-gray-500 font-bold text-lg">{{ isSaving ? 'กำลังบันทึกลงฐานข้อมูล...' : 'กำลังโหลดข้อมูลจาก Google Sheets...' }}</p>
+            <p class="mt-4 text-gray-500 font-bold text-lg">{{ isSaving ? 'กำลังบันทึกลงฐานข้อมูล...' : 'กำลังโหลดข้อมูลจากระบบ...' }}</p>
         </div>
 
         <template v-if="!isLoading && !isSaving">
@@ -51,6 +51,13 @@
             <div v-if="viewState === 'home'" class="animate-[fadeIn_0.3s_ease-out]">
                 <!-- Header & Search -->
                 <div class="bg-white rounded-3xl shadow-lg p-6 md:p-10 mb-6 text-center transition-all duration-300 relative overflow-hidden">
+                    
+                    <!-- ปุ่ม Refresh ข้อมูลมุมขวาบน -->
+                    <button @click="loadData" class="absolute top-4 right-4 text-gray-400 hover:text-blue-600 bg-gray-100 hover:bg-blue-50 p-2.5 rounded-full transition-colors flex items-center gap-2" title="โหลดข้อมูลใหม่">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        <span class="text-xs font-bold hidden sm:inline">รีเฟรช</span>
+                    </button>
+
                     <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 transition-colors relative z-10"
                          :class="searchMode === 'item' ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-orange-600'">
                         <svg v-if="searchMode === 'item'" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -83,25 +90,25 @@
                     </div>
 
                     <!-- Search Box -->
-                    <div class="relative max-w-xl mx-auto flex gap-2">
+                    <div class="relative max-w-xl mx-auto flex flex-col sm:flex-row gap-2">
                         <div class="relative flex-1">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
-                            <input type="text" v-model="searchText" @input="resetPagination"
+                            <input type="text" v-model="searchText" @input="resetPagination" @keyup.enter="$event.target.blur()"
                                    :placeholder="searchMode === 'item' ? 'ค้นหา เช่น กรอง, ลูกปืน, ปั๊ม...' : 'ค้นหาชื่อร้านค้า...'" 
-                                   class="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-lg focus:outline-none transition-colors shadow-inner"
+                                   class="w-full pl-12 pr-10 py-3.5 bg-gray-50 border-2 border-gray-200 rounded-xl text-lg focus:outline-none transition-colors shadow-inner"
                                    :class="searchMode === 'item' ? 'focus:border-blue-500' : 'focus:border-orange-500'"
                                    autocomplete="off">
                             <button v-if="searchText" @click="searchText = ''; resetPagination();" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600">
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
-                        <button @click="openCreateView" class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-xl font-bold transition-all shadow-md flex items-center gap-2 shrink-0">
+                        <button @click="openCreateView" class="bg-green-500 hover:bg-green-600 text-white px-5 py-3.5 rounded-xl font-bold transition-all shadow-md flex items-center justify-center gap-2 shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
-                            <span class="hidden sm:inline">เพิ่มข้อมูล</span>
+                            <span>เพิ่มข้อมูล</span>
                         </button>
                     </div>
                 </div>
@@ -115,7 +122,7 @@
                     <div v-if="filteredItems.length === 0" class="bg-white rounded-2xl p-10 text-center shadow-sm border border-gray-100">
                         <svg class="mx-auto h-12 w-12 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         <p class="text-gray-500 mb-4">ไม่พบอะไหล่ที่คุณค้นหา</p>
-                        <button @click="openCreateView" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-blue-200">
+                        <button @click="openCreateView" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-blue-200 transition-colors">
                             + เพิ่มอะไหล่ "{{ searchText }}" ลงระบบ
                         </button>
                     </div>
@@ -153,7 +160,7 @@
                     <div v-if="filteredVendors.length === 0" class="bg-white rounded-2xl p-10 text-center shadow-sm border border-gray-100">
                         <svg class="mx-auto h-12 w-12 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
                         <p class="text-gray-500 mb-4">ไม่พบร้านค้าที่คุณค้นหา</p>
-                        <button @click="openCreateView" class="bg-orange-100 text-orange-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-orange-200">
+                        <button @click="openCreateView" class="bg-orange-100 text-orange-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-orange-200 transition-colors">
                             + เพิ่มร้านค้า "{{ searchText }}" ลงระบบ
                         </button>
                     </div>
@@ -190,7 +197,7 @@
             <div v-else-if="viewState === 'itemDetail'" class="bg-white rounded-3xl shadow-xl overflow-hidden animate-[fadeIn_0.2s_ease-out]">
                 <!-- Header -->
                 <div class="bg-blue-600 p-6 sm:p-8 text-white relative">
-                    <button @click="goBack" class="absolute top-6 left-6 text-white bg-black/20 hover:bg-black/40 px-3 py-1.5 rounded-full text-sm font-bold transition-colors flex items-center gap-1">
+                    <button @click="goBack" class="absolute top-6 left-6 text-white bg-black/20 hover:bg-black/40 px-4 py-2 rounded-full text-sm font-bold transition-colors flex items-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
                         ย้อนกลับ
                     </button>
@@ -286,12 +293,12 @@
             <div v-else-if="viewState === 'vendorDetail'" class="bg-white rounded-3xl shadow-xl overflow-hidden animate-[fadeIn_0.2s_ease-out]">
                 <!-- Header (ส้ม=ดู, เทา=แก้ไข) -->
                 <div class="p-6 sm:p-8 text-white relative transition-colors duration-300" :class="activeVendorData.isEditing ? 'bg-gray-800' : 'bg-gradient-to-r from-orange-500 to-orange-600'">
-                    <button @click="goBack" class="absolute top-6 left-6 text-white bg-black/20 hover:bg-black/40 px-3 py-1.5 rounded-full text-sm font-bold transition-colors flex items-center gap-1">
+                    <button @click="goBack" class="absolute top-6 left-6 text-white bg-black/20 hover:bg-black/40 px-4 py-2 rounded-full text-sm font-bold transition-colors flex items-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
                         ย้อนกลับ
                     </button>
                     
-                    <button v-if="!activeVendorData.isEditing" @click="startEditVendor" class="absolute top-6 right-6 text-white bg-black/20 hover:bg-black/40 px-3 py-1.5 rounded-full text-sm font-bold transition-colors flex items-center gap-1">
+                    <button v-if="!activeVendorData.isEditing" @click="startEditVendor" class="absolute top-6 right-6 text-white bg-black/20 hover:bg-black/40 px-4 py-2 rounded-full text-sm font-bold transition-colors flex items-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                         แก้ไข
                     </button>
@@ -399,7 +406,7 @@
             <div v-else-if="viewState === 'createView'" class="bg-white rounded-3xl shadow-xl overflow-hidden animate-[fadeIn_0.2s_ease-out]">
                 
                 <div class="bg-green-600 p-6 sm:p-8 text-white relative">
-                    <button @click="goBack" class="absolute top-6 left-6 text-white bg-black/20 hover:bg-black/40 px-3 py-1.5 rounded-full text-sm font-bold transition-colors flex items-center gap-1">
+                    <button @click="goBack" class="absolute top-6 left-6 text-white bg-black/20 hover:bg-black/40 px-4 py-2 rounded-full text-sm font-bold transition-colors flex items-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
                         ยกเลิก
                     </button>
@@ -512,7 +519,7 @@
     </div>
 
     <script>
-        const { createApp, ref, computed, onMounted, watch } = Vue;
+        const { createApp, ref, computed, onMounted } = Vue;
 
         createApp({
             setup() {
@@ -532,15 +539,13 @@
                 const vendors = ref([]);
                 
                 const searchText = ref('');
-                const searchMode = ref('item'); // 'item' หรือ 'vendor'
+                const searchMode = ref('item'); 
                 
-                // ระบบเปลี่ยนหน้า (Views) และประวัติ
-                const viewState = ref('home'); // home, itemDetail, vendorDetail, createView
+                const viewState = ref('home'); 
                 const viewHistory = ref([]);
                 
                 const systemMessage = ref({ show: false, text: '', isError: false });
 
-                // ข้อมูลสำหรับแต่ละ View
                 const activeItemData = ref({ itemName: '', vendors: [], selectedVendorToAdd: '', vendorSearchQuery: '', showVendorDropdown: false, isConfirmingDelete: false });
                 const activeVendorData = ref({ info: { Items_Sold: [] }, isEditing: false, editData: {}, isConfirmingDelete: false });
                 const createData = ref({ newItem: { name: '', vendors: [], tempVendor: '', vendorSearchQuery: '', showVendorDropdown: false }, newVendor: { name: '', phone: '', line: '' } });
@@ -575,6 +580,29 @@
                         return await response.json();
                     } catch (error) {
                         return { success: false, message: 'เกิดข้อผิดพลาดในการเชื่อมต่อกับ Google Sheets' };
+                    }
+                };
+
+                // ==========================================
+                // โหลดข้อมูล + ทลายแคช (Cache Buster)
+                // ==========================================
+                const loadData = async () => {
+                    isLoading.value = true;
+                    try {
+                        // เติม ?t=timestamp เข้าไปท้าย URL เพื่อบังคับให้ดึงข้อมูลใหม่เสมอ (หนี Cache ของ Browser)
+                        const cacheBuster = `&t=${new Date().getTime()}`;
+                        
+                        const [itemsData, vendorsData] = await Promise.all([
+                            new Promise(res => Papa.parse(SHEET_URLS.items + cacheBuster, { download: true, header: true, skipEmptyLines: true, complete: r => res(r.data) })),
+                            new Promise(res => Papa.parse(SHEET_URLS.vendors + cacheBuster, { download: true, header: true, skipEmptyLines: true, complete: r => res(r.data) }))
+                        ]);
+                        
+                        items.value = itemsData;
+                        vendors.value = vendorsData;
+                    } catch (error) {
+                        showMessage('โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่', true);
+                    } finally {
+                        isLoading.value = false;
                     }
                 };
 
@@ -655,13 +683,18 @@
                     return vendors.value.find(v => normalizeText(getVendorName(v)) === normName);
                 });
 
-
                 // ==========================================
                 // Navigation (เปลี่ยนหน้า)
                 // ==========================================
                 const navigateTo = (view) => {
                     if (viewState.value !== view) {
-                        viewHistory.value.push(viewState.value);
+                        // ป้องกัน History ซ้อนทับกันมากเกินไป (Limit ที่ 10)
+                        if (viewHistory.value.length > 0 && viewHistory.value[viewHistory.value.length - 1] !== viewState.value) {
+                            viewHistory.value.push(viewState.value);
+                            if(viewHistory.value.length > 10) viewHistory.value.shift();
+                        } else if (viewHistory.value.length === 0) {
+                            viewHistory.value.push(viewState.value);
+                        }
                     }
                     viewState.value = view;
                     window.scrollTo(0, 0);
@@ -853,10 +886,14 @@
                                     }
                                 });
                             }
-                            // Update local view
+                            
+                            // อัปเดตข้อมูลในหน้า View ปัจจุบัน
                             activeVendorData.value.info.Vendor_Name = newName;
                             activeVendorData.value.info.Phone = newData.Phone;
                             activeVendorData.value.info.Line_ID = newData.Line_ID;
+                            // 🌟 คำนวณรายชื่ออะไหล่ใหม่ หลังจากเปลี่ยนชื่อร้าน (แก้ Bug 2)
+                            activeVendorData.value.info.Items_Sold = getItemsSoldByVendor(newName);
+                            
                             showMessage(`อัปเดตข้อมูลร้านค้าเรียบร้อย`);
                         }
                     } else {
@@ -890,7 +927,6 @@
                     isSaving.value = false;
                 };
 
-                // ลบรายการอะไหล่ทิ้งทั้งบรรทัด (เพิ่มใหม่)
                 const deleteItem = async () => {
                     const itemNameToDelete = activeItemData.value.itemName;
                     isSaving.value = true;
@@ -1022,29 +1058,15 @@
                     return merged;
                 });
 
-                // สำหรับนำไปโชว์ทีละ 20 รายการ
                 const displayedItems = computed(() => filteredItems.value.slice(0, itemsLimit.value));
                 const displayedVendors = computed(() => filteredVendors.value.slice(0, vendorsLimit.value));
 
-                // ==========================================
-                // Load CSV
-                // ==========================================
-                onMounted(async () => {
-                    try {
-                        const [itemsData, vendorsData] = await Promise.all([
-                            new Promise(res => Papa.parse(SHEET_URLS.items, { download: true, header: true, skipEmptyLines: true, complete: r => res(r.data) })),
-                            new Promise(res => Papa.parse(SHEET_URLS.vendors, { download: true, header: true, skipEmptyLines: true, complete: r => res(r.data) }))
-                        ]);
-                        items.value = itemsData;
-                        vendors.value = vendorsData;
-                        isLoading.value = false;
-                    } catch (error) {
-                        isLoading.value = false;
-                    }
+                onMounted(() => {
+                    loadData();
                 });
 
                 return {
-                    isLoading, isSaving, searchText, searchMode, systemMessage, viewState,
+                    isLoading, isSaving, searchText, searchMode, systemMessage, viewState, loadData,
                     filteredItems, filteredVendors, displayedItems, displayedVendors, loadMoreItems, loadMoreVendors, resetPagination,
                     allVendorNames, availableVendorsForNewItem, filteredAvailableVendorsForNewItem, filteredAvailableVendorsForItemModal,
                     existingItemMatch, existingVendorMatch, openExistingItemFromCreate, openExistingVendorFromCreate,
