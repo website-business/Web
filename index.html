@@ -174,7 +174,11 @@
                             </div>
                             <div>
                                 <h3 class="text-lg font-bold text-gray-800">{{ getVendorName(vendor) }}</h3>
-                                <p class="text-sm text-gray-400">คลิกเพื่อดูและแก้ไขข้อมูลติดต่อ</p>
+                                <!-- แสดง Payment Terms แบบย่อในลิสต์ -->
+                                <p class="text-sm text-gray-400">
+                                    <span v-if="getPaymentTerms(vendor)" class="inline-block bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs mr-1">{{ getPaymentTerms(vendor) }}</span>
+                                    คลิกเพื่อดูและแก้ไขข้อมูลติดต่อ
+                                </p>
                             </div>
                         </div>
                         <div class="text-orange-500 bg-orange-50 p-2 rounded-full group-hover:bg-orange-100">
@@ -336,6 +340,17 @@
                             </div>
                         </div>
 
+                        <!-- 🌟 เพิ่มช่องเงื่อนไขการชำระเงิน -->
+                        <div class="flex items-center gap-5 p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                            <div class="bg-purple-100 p-4 rounded-xl text-purple-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm text-gray-500 font-bold mb-1">เงื่อนไขการชำระเงิน</p>
+                                <p class="font-bold text-gray-900 text-xl">{{ activeVendorData.info.Payment_Terms || '-' }}</p>
+                            </div>
+                        </div>
+
                         <!-- รายการอะไหล่ที่ร้านนี้ขาย -->
                         <div class="mt-8 pt-6 border-t border-gray-200">
                             <div class="flex items-center gap-2 mb-4">
@@ -379,6 +394,11 @@
                         <div>
                             <label class="block text-sm font-bold text-gray-600 mb-2">LINE ID</label>
                             <input type="text" v-model="activeVendorData.editData.Line_ID" class="w-full border-2 border-gray-300 rounded-xl p-3 focus:border-green-500 outline-none text-lg">
+                        </div>
+                        <!-- 🌟 เพิ่ม Input แก้ไขเงื่อนไขการชำระเงิน -->
+                        <div>
+                            <label class="block text-sm font-bold text-gray-600 mb-2">เงื่อนไขการชำระเงิน</label>
+                            <input type="text" v-model="activeVendorData.editData.Payment_Terms" placeholder="เช่น เงินสด, เครดิต 30 วัน" class="w-full border-2 border-gray-300 rounded-xl p-3 focus:border-purple-500 outline-none text-lg">
                         </div>
                         
                         <div class="flex gap-3 pt-4">
@@ -523,6 +543,13 @@
                         <input type="text" v-model="createData.newVendor.line" placeholder="เช่น @shopname" 
                                class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-orange-500 outline-none text-lg shadow-sm bg-white">
                     </div>
+                    <!-- 🌟 เพิ่ม Input เงื่อนไขการชำระเงิน (ตอนเพิ่มร้านค้าใหม่) -->
+                    <div>
+                        <label class="block text-base font-bold text-gray-700 mb-2">เงื่อนไขการชำระเงิน</label>
+                        <input type="text" v-model="createData.newVendor.payment_terms" placeholder="เช่น เงินสด, โอนเงิน, เครดิต 7 วัน" 
+                               class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-purple-500 outline-none text-lg shadow-sm bg-white">
+                    </div>
+                    
                     <button @click="createNewVendor" :disabled="!createData.newVendor.name.trim() || existingVendorMatch"
                             class="w-full py-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors mt-6 shadow-md text-lg">
                         บันทึกลงฐานข้อมูล
@@ -561,10 +588,11 @@
                 
                 const systemMessage = ref({ show: false, text: '', isError: false });
 
-                // 🌟 เพิ่ม sparePart เข้าไปใน data state
                 const activeItemData = ref({ itemName: '', sparePart: '', vendors: [], selectedVendorToAdd: '', vendorSearchQuery: '', showVendorDropdown: false, isConfirmingDelete: false });
-                const activeVendorData = ref({ info: { Items_Sold: [] }, isEditing: false, editData: {}, isConfirmingDelete: false });
-                const createData = ref({ newItem: { name: '', sparePart: '', vendors: [], tempVendor: '', vendorSearchQuery: '', showVendorDropdown: false }, newVendor: { name: '', phone: '', line: '' } });
+                
+                // 🌟 เพิ่ม Payment_Terms ลงใน state ของ Vendor
+                const activeVendorData = ref({ info: { Items_Sold: [], Payment_Terms: '' }, isEditing: false, editData: {}, isConfirmingDelete: false });
+                const createData = ref({ newItem: { name: '', sparePart: '', vendors: [], tempVendor: '', vendorSearchQuery: '', showVendorDropdown: false }, newVendor: { name: '', phone: '', line: '', payment_terms: '' } });
 
                 const itemsPerPage = 20;
                 const itemsLimit = ref(itemsPerPage);
@@ -622,13 +650,17 @@
                     return itemObj['รายการสินค้า'] || itemObj['รายการ'] || itemObj['Item_Name'] || Object.values(itemObj)[0];
                 };
 
-                // 🌟 ฟังก์ชันช่วยดึงค่า Spare Part
                 const getSparePart = (itemObj) => {
                     return itemObj['Spare Part'] || itemObj['Spare_Part'] || itemObj['SparePart'] || '';
                 };
 
                 const getVendorName = (vendorObj) => {
                     return vendorObj['ร้านค้า'] || vendorObj['ชื่อร้านค้า'] || vendorObj['ชื่อร้าน'] || vendorObj['Vendor_Name'] || Object.values(vendorObj)[0];
+                };
+                
+                // 🌟 ดึงข้อมูล Payment Terms สำหรับโชว์ในการ์ดหน้าแรก (ถ้าต้องการ)
+                const getPaymentTerms = (vendorObj) => {
+                    return vendorObj['เงื่อนไขการชำระเงิน'] || vendorObj['การชำระเงิน'] || vendorObj['Payment_Terms'] || vendorObj['Payment'] || '';
                 };
 
                 const normalizeText = (text) => {
@@ -637,7 +669,6 @@
                     return t.replace(/[่้๊๋์]/g, '').replace(/[\s\-\,\.\(\)]/g, '');
                 };
 
-                // 🌟 ปรับให้ Items_Sold เก็บทั้งชื่ออะไหล่และ Spare Part
                 const getItemsSoldByVendor = (vName) => {
                     let soldItems = [];
                     items.value.forEach(itemObj => {
@@ -760,6 +791,7 @@
                         Vendor_Name: clickedVendorName,
                         Phone: vendorRow ? (vendorRow['เบอร์โทร'] || vendorRow['เบอร์ติดต่อ'] || vendorRow['โทรศัพท์'] || vendorRow['Phone'] || '') : '',
                         Line_ID: vendorRow ? (vendorRow['Line'] || vendorRow['Line_ID'] || vendorRow['ไลน์'] || '') : '',
+                        Payment_Terms: vendorRow ? (vendorRow['เงื่อนไขการชำระเงิน'] || vendorRow['การชำระเงิน'] || vendorRow['Payment'] || vendorRow['Payment_Terms'] || '') : '', // 🌟 ดึงค่าการชำระเงิน
                         Items_Sold: getItemsSoldByVendor(clickedVendorName)
                     };
 
@@ -778,6 +810,7 @@
                     createData.value.newVendor.name = searchMode.value === 'vendor' ? searchText.value : '';
                     createData.value.newVendor.phone = '';
                     createData.value.newVendor.line = '';
+                    createData.value.newVendor.payment_terms = ''; // 🌟 ล้างค่า
                     
                     navigateTo('createView');
                 };
@@ -817,7 +850,6 @@
                     
                     isSaving.value = true;
 
-                    // 🌟 ส่งค่า sparePart ไปให้ Apps Script ด้วย
                     const response = await sendDataToSheet({
                         action: 'addItem',
                         itemName: name,
@@ -827,7 +859,6 @@
 
                     if (response.success) {
                         const baseKey = items.value.length > 0 ? Object.keys(items.value[0]).find(k => k.includes('สินค้า') || k.includes('Item')) || 'Item_Name' : 'Item_Name';
-                        // 🌟 อัปเดตในเครื่องด้วย
                         let newObj = { [baseKey]: name, 'Spare Part': spare };
                         vendorArray.forEach((v, idx) => { newObj[`ร้านค้าที่ ${idx + 1}`] = v; });
                         items.value.unshift(newObj); 
@@ -849,14 +880,16 @@
                         action: 'addVendor',
                         vendorName: vData.name.trim(),
                         phone: vData.phone.trim() || '-',
-                        line: vData.line.trim() || '-'
+                        line: vData.line.trim() || '-',
+                        payment_terms: vData.payment_terms.trim() || '-' // 🌟 ส่งค่าใหม่
                     });
 
                     if (response.success) {
                         let newObj = {
                             'Vendor_Name': vData.name.trim(),
                             'Phone': vData.phone.trim() || '-',
-                            'Line_ID': vData.line.trim() || '-'
+                            'Line_ID': vData.line.trim() || '-',
+                            'เงื่อนไขการชำระเงิน': vData.payment_terms.trim() || '-' // 🌟 บันทึก Local
                         };
                         vendors.value.unshift(newObj);
                         showMessage(`เพิ่มร้านค้า "${vData.name}" เรียบร้อย`);
@@ -888,6 +921,7 @@
                         newVendorName: newName,
                         phone: newData.Phone || '-',
                         line: newData.Line_ID || '-',
+                        payment_terms: newData.Payment_Terms || '-', // 🌟 ส่งค่าใหม่
                         other: '-'
                     });
 
@@ -898,6 +932,7 @@
                             vendors.value[vIndex][dbVendorNameKey] = newName;
                             vendors.value[vIndex]['Phone'] = newData.Phone || '-';
                             vendors.value[vIndex]['Line_ID'] = newData.Line_ID || '-';
+                            vendors.value[vIndex]['เงื่อนไขการชำระเงิน'] = newData.Payment_Terms || '-'; // 🌟 อัปเดต Local
 
                             if (oldName !== newName) {
                                 items.value.forEach(itemObj => {
@@ -910,6 +945,7 @@
                             activeVendorData.value.info.Vendor_Name = newName;
                             activeVendorData.value.info.Phone = newData.Phone;
                             activeVendorData.value.info.Line_ID = newData.Line_ID;
+                            activeVendorData.value.info.Payment_Terms = newData.Payment_Terms; // 🌟 อัปเดต UI
                             activeVendorData.value.info.Items_Sold = getItemsSoldByVendor(newName);
                             
                             showMessage(`อัปเดตข้อมูลร้านค้าเรียบร้อย`);
@@ -1044,12 +1080,10 @@
                         const rawSpare = getSparePart(item).toLowerCase();
                         
                         if (rawName.includes(rawQuery) || normalizeText(rawName).includes(normQuery)) return true;
-                        // 🌟 ให้ค้นหาจาก Spare Part ได้ด้วย
                         if (rawSpare.includes(rawQuery) || normalizeText(rawSpare).includes(normQuery)) return true;
                         return false;
                     });
 
-                    // 🌟 เพิ่ม Spare Part ในเป้าหมายการค้นหาของ Fuse.js
                     const fuse = new Fuse(validItems, { 
                         keys: [ getItemName, item => normalizeText(getItemName(item)), getSparePart, item => normalizeText(getSparePart(item)) ], 
                         threshold: 0.4, ignoreLocation: true, ignoreFieldNorm: true 
@@ -1095,7 +1129,7 @@
                     filteredItems, filteredVendors, displayedItems, displayedVendors, loadMoreItems, loadMoreVendors, resetPagination,
                     allVendorNames, availableVendorsForNewItem, filteredAvailableVendorsForNewItem, filteredAvailableVendorsForItemModal,
                     existingItemMatch, existingVendorMatch, openExistingItemFromCreate, openExistingVendorFromCreate,
-                    activeItemData, activeVendorData, createData, getItemName, getSparePart, getVendorName, getAvailableVendorsToAdd,
+                    activeItemData, activeVendorData, createData, getItemName, getSparePart, getVendorName, getPaymentTerms, getAvailableVendorsToAdd,
                     openItem, openVendor, openCreateView, goBack, navigateTo,
                     selectVendorForNewItem, selectVendorForItemModal, deleteVendor, deleteItem,
                     createNewItem, createNewVendor, startEditVendor, saveVendorEdit, removeVendorFromItem, addVendorToItem
